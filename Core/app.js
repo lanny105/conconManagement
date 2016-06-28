@@ -42,8 +42,6 @@ function compare(parseObj, obj){
 //    console.log(obj);
 //    console.log("------------");
     
-    
-    
     for(var i = 0; i < obj.length; ++i) {
         
         var flag = 2;

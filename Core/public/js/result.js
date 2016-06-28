@@ -1,3 +1,6 @@
+//<script src="//www.parsecdn.com/js/parse-1.6.14.min.js"></script>
+Parse.initialize("GGTNZ2qrKXClObC4qotCEIBCFEpytaSscYJ7yzcG", "FEmiLsJNjftJ2kMob61vequskh6COimJvPSmYqZo");
+var global;
 function printTerms(id, obj) {
 
   $(id).empty();
@@ -7,9 +10,10 @@ function printTerms(id, obj) {
 //      
   if (obj.length>0) {
     $(id+"_pro").empty();
+    $(id+"_pro").html("<button type='button' class='btn btn-success btn-sm' onclick = 'submit()'>insert</button>");
   }
   else {
-    $(id+"_pro").html('No data qualified...');
+    $(id+"_pro").html('<div color="red" id="table1_pro"><font color="red">finished analyzing, No data needs to be mannually decided.</font></div>');
     return;
   }
 
@@ -30,11 +34,117 @@ function printTerms(id, obj) {
 //
 //    var seconds = (x - hours*3600-mins*60).toFixed(2);
 
-    $(id).append("<tr><td>"+(i+1)+"</td><td>"+obj[i].name+"</td><td>"+obj[i].eventCity+"</td><td>"+ obj[i].eventState+ "</td><td>"+obj[i].eventVenue + "</td><td>" + obj[i].eventStartDate + "</td><td>"+obj[i].eventEndDate + "</td><td><button type='button' class='btn btn-success btn-sm'>insert</button></td><td><button type='button' class='btn btn-success btn-sm'>discard</button></td></tr>");
+    $(id).append("<tr><td>"+(i+1)+"</td><td>"+obj[i].name+"</td><td>"+obj[i].eventCity+"</td><td>"+ obj[i].eventState+ "</td><td>"+obj[i].eventVenue + "</td><td>" + obj[i].eventStartDate + "</td><td>"+obj[i].eventEndDate + "</td><td><input type='checkbox' checked></td></tr>");
   };
 
 //  $(id).pageMe({pagerSelector:id+'_myPager',showPrevNext:true,hidePageNumbers:false,perPage:15,numbersPerPage:5});
 
+}
+
+
+
+function submit() {
+    var tds = $('#table1 tr');
+    var insertArray = [];
+    
+    for(var i = 0; i < tds.length; ++i) {
+        if(tds[i].children[7].children[0].checked) {
+            
+            var Event = Parse.Object.extend("Event");
+            var event = new Event();
+            
+            
+            event.set("artistAlleyApplicationStatus",1);
+            event.set("artistAlleyBoothPrice",0);
+//                event.set("artistAlleyContactInfo");
+            event.set("artistAlleySpotsAvailablility",0);
+                
+            if (global[i].registerURL!="") {
+                event.set("artistsAlleyRegistrationUrl",global[i].registerURL);
+            }
+            else {
+                event.set("artistsAlleyRegistrationUrl","N/A");
+            }
+
+            if (global[i].atDoorTicketPrices!="") {
+                event.set("atDoorTicketPrices",global[i].atDoorRates);
+            }
+            else {
+                event.set("atDoorTicketPrices","N/A");
+            }
+                
+//                event.set("boothEnrollmentEndDay");
+//                event.set("boothOpenEnrollmentDay");
+//                event.set("exhibitorBoothEnrollmentEndDay");
+//                event.set("exhibitorBoothOpenEnrollmentDay");
+                
+            event.set("eventAddress","");
+//                event.set("eventAttendancePriorYear");
+                
+                
+            event.set("eventCity",global[i].eventCity);
+            event.set("eventCountry",global[i].eventCountry);
+            event.set("eventDescription",global[i].description);
+                
+            event.set("eventHomeUrl",global[i].siteURL);
+                
+            var point = new Parse.GeoPoint({latitude: global[i].latitude, longitude: global[i].longitude});
+            event.set("eventLatLong",point);
+            event.set("eventName",global[i].name);
+                
+            if(global[i].eventStartDate!="") {
+                event.set("eventStartDate",new Date(global[i].eventStartDate));
+            }
+            
+            if(global[i].eventEndDate!="") {
+                event.set("eventEndDate",new Date(global[i].eventEndDate));
+            }
+                
+//                event.set("eventStartTime");
+            event.set("eventState",global[i].eventState);
+            event.set("eventStatus","NORMAL");
+                
+
+            event.set("eventType",global[i].eventType);
+
+            event.set("eventVenue",global[i].eventVenue);
+                
+            event.set("exhibitorApplicationStatus",1);
+            event.set("exhibitorBoothPrice",0);
+//                event.set("exhibitorContactInfo","");
+//                event.set("exhibitorSpotsAvailable","");
+            event.set("exhibitorsBoothRegistrationUrl","N/A");
+            event.set("fanTicketRegistrationUrl","N/A");
+            event.set("featuredEvent",false);
+            event.set("notes","");
+            event.set("organizerContactUrl","");
+            event.set("presaleTicketPrices","N/A");
+            event.set("eventNamelower_case","");
+            event.set("hiddenEvent",false);
+            insertArray.push(event);
+
+        }
+        
+        console.log(insertArray);
+        
+        Parse.Object.saveAll(insertArray, {
+            success: function(list) {
+                    // Execute any logic that should take place after the object is saved.
+//                  alert('New object created with objectId: ' + gameScore.id);
+                    
+                alert('insert completed!');
+                window.location = '/';
+
+            },
+            error: function(event, error) {
+                // Execute any logic that should take place if the save fails.
+                // error is a Parse.Error with an error code and message.
+//                        alert('Failed to create new object, with error code: ' + error.message);
+                console.log(error);
+            }
+        });
+        
+    }
 }
 
 
@@ -285,6 +395,7 @@ $(document).ready(function () {
 
         var c = JSON.parse(returnval); 
         console.log(c);
+        global = c;
         printTerms('#table1',c);
 //      draw('chart1',c[3]);
 //
